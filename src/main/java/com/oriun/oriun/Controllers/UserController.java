@@ -112,11 +112,11 @@ public class UserController {
             	confirmationTokenRepository.save(confirmationToken);
 				SimpleMailMessage mailMessage = new SimpleMailMessage();
 				mailMessage.setTo(user.getEMAIL());
-				mailMessage.setSubject("Complete Registration!");
+				mailMessage.setSubject("Completar Registro!");
 				mailMessage.setFrom("oriunmail@gmail.com");
 				String url="https://oriun.herokuapp.com/confirm-account?token="+confirmationToken.getCONFIRMATION_TOKEN();
         		String content="< href='"+url+"'>"+url+"</a>";
-				String html= ("To confirm your account, please click here : "
+				String html= ("para comfirmar tu cuenta, ingresa al siguiente enlace : "
 				+url);
 				mailMessage.setText(html);
 				//+"https://oriun.herokuapp.com/confirm-account?token="+confirmationToken.getCONFIRMATION_TOKEN());
@@ -129,15 +129,103 @@ public class UserController {
 		
 	}
 	
+
+
+
+	@RequestMapping(value="/password-request", method= {RequestMethod.POST})
+    public ResponseEntity PasswordReset(@RequestParam("email")String email)
+    {
+        UserModel user=userService.getUserByEmail(email);
+		if(user!=null){
+			ConfirmationTokenModel confirmationToken = new ConfirmationTokenModel(user.getUSER_NAME());
+            confirmationTokenRepository.save(confirmationToken);
+			SimpleMailMessage mailMessage = new SimpleMailMessage();
+			mailMessage.setTo(user.getEMAIL());
+			mailMessage.setSubject("Reestablecer contraseña");
+			mailMessage.setFrom("oriunmail@gmail.com");
+			String url="https://oriun.herokuapp.com/password-reset?token="+confirmationToken.getCONFIRMATION_TOKEN();
+        	String content="< href='"+url+"'>"+url+"</a>";
+			String html= ("Para cambiar su contraseña ingrese al siguiente enlace : "+url);
+			mailMessage.setText(html);
+			emailSenderService.sendEmail(mailMessage);
+			return new ResponseEntity<>(
+				"Peticion de cambio de contraseña exitoso  "+user.getUSER_NAME(),
+				HttpStatus.OK);
+		}else{
+			return new ResponseEntity<>(
+				"error correo invalido", 
+				HttpStatus.UNPROCESSABLE_ENTITY);
+		}
+    }
+
+	@RequestMapping(value="/password-change", method= {RequestMethod.POST})
+    public ResponseEntity PasswordChange(@RequestParam("email")String email)
+    {
+        UserModel user=userService.getUserByEmail(email);
+		if(user!=null){
+			ConfirmationTokenModel confirmationToken = new ConfirmationTokenModel(user.getUSER_NAME());
+            confirmationTokenRepository.save(confirmationToken);
+			SimpleMailMessage mailMessage = new SimpleMailMessage();
+			mailMessage.setTo(user.getEMAIL());
+			mailMessage.setSubject("Cambio de contraseña");
+			mailMessage.setFrom("oriunmail@gmail.com");
+			String url="https://oriun.herokuapp.com/password-change?token="+confirmationToken.getCONFIRMATION_TOKEN();
+        	String content="< href='"+url+"'>"+url+"</a>";
+			String html= ("Para realizar el cambio de su contraseña ingrese al siguiente enlace : "+url);
+			mailMessage.setText(html);
+			emailSenderService.sendEmail(mailMessage);
+			return new ResponseEntity<>(
+				"Peticion de cambio de contraseña exitoso  "+user.getUSER_NAME(),
+				HttpStatus.OK);
+		}else{
+			return new ResponseEntity<>(
+				"error correo invalido", 
+				HttpStatus.UNPROCESSABLE_ENTITY);
+		}
+    }
+
+	@RequestMapping(value="/confirm-password", method= {RequestMethod.POST})
+    public ResponseEntity confirmPasswordChange(@RequestParam("token")String confirmationToken,@RequestParam("password")String password)
+    {
+        ConfirmationTokenModel token = confirmationTokenRepository.findByConfirmationToken(confirmationToken);
+		Optional<UserModel> user=userService.getUser(token.getUSER_NAME());
+		encoder= new Encoder();
+        if(token != null)
+        {
+			if(user.get().getPASSWORD().equals(encoder.encode(password))){
+				{
+					return new ResponseEntity<>(
+					"error same password", 
+					HttpStatus.CONFLICT);
+				}
+			}
+			System.out.println(token.getUSER_NAME());
+            userService.updateUserPassword(token.getUSER_NAME(),encoder.encode(password));
+			confirmationTokenRepository.deleteById(token.getTOKEN_ID());
+            return new ResponseEntity<>(
+					"your password recovery is succesfull "+token.getUSER_NAME(), 
+					HttpStatus.OK);
+        }
+        else
+        {
+            return new ResponseEntity<>(
+			"error invalid token", 
+			HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
+    }
+
+
+
 	@RequestMapping(value="/confirm-account", method= {RequestMethod.POST})
     public ResponseEntity confirmUserAccount(@RequestParam("token")String confirmationToken)
     {
         ConfirmationTokenModel token = confirmationTokenRepository.findByConfirmationToken(confirmationToken);
-
         if(token != null)
         {
 			System.out.println(token.getUSER_NAME());
             userService.updateUserState(token.getUSER_NAME());
+			confirmationTokenRepository.deleteById(token.getTOKEN_ID());
             return new ResponseEntity<>(
 					"your user register is succesfull "+token.getUSER_NAME(), 
 					HttpStatus.OK);

@@ -53,7 +53,9 @@ public class ConfirmationTokenModel {
     }
     public ConfirmationTokenModel(String user) {
         this.USER_NAME = user;
-        this.CREATE_DATE = new Date(0, 0, 0);
+        java.util.Date d1 = new java.util.Date();
+        java.sql.Date sqlDate = new java.sql.Date(d1.getTime());
+        this.CREATE_DATE = sqlDate;
         this.CONFIRMATION_TOKEN = UUID.randomUUID().toString();
     }
 }

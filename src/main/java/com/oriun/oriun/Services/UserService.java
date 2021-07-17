@@ -30,6 +30,9 @@ public class UserService {
     public void updateUserState(String user_name){
         userRepository.updateUserState(user_name);
     }
+    public void updateUserPassword(String user_name,String password){
+        userRepository.updateUserPassword(user_name,password);
+    }
     public UserModel saveUser(UserModel user){
         return userRepository.save(user);
     }

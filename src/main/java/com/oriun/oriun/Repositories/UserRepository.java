@@ -20,6 +20,10 @@ public interface UserRepository extends JpaRepository<UserModel,String>{
           nativeQuery = true)
   void updateUserState(String user_name);
   @Modifying
+  @Query(value = "UPDATE oriun_prueba.user SET PASSWORD = ?2 WHERE USER_NAME= ?1",
+          nativeQuery = true)
+  void updateUserPassword(String user_name,String password);
+  @Modifying
   @Query(value = "UPDATE oriun_prueba.user SET ENABLED = 0 WHERE USER_NAME= ?1",
           nativeQuery = true)
   int disableUserState(String user_name);
