@@ -10,6 +10,7 @@ import com.oriun.oriun.Models.ConfirmationTokenModel;
 import com.oriun.oriun.Models.UserModel;
 import com.oriun.oriun.Repositories.ConfirmationTokenRepository;
 import com.oriun.oriun.Security.Encoder;
+import com.oriun.oriun.Services.ConfirmationTokenService;
 import com.oriun.oriun.Services.EmailSenderService;
 import com.oriun.oriun.Services.UserService;
 import java.util.Date;
@@ -38,7 +39,7 @@ public class UserController {
 	Encoder encoder; 
 
 	@Autowired
-    private ConfirmationTokenRepository confirmationTokenRepository;
+    private ConfirmationTokenService confirmationTokenService;
 
     @Autowired
     private EmailSenderService emailSenderService;
@@ -58,7 +59,7 @@ public class UserController {
 
 	@PostMapping("/modreg")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity registermod(@RequestParam("user") String user_name, @RequestParam("password") String password) {
+	public ResponseEntity registermod(@RequestParam("user") String user_name, @RequestParam("password") String password,@RequestParam("email") String email) {
 		UserModel user= new UserModel();
 		//user.setPASSWORD(passwordEncoder.encode(password));
 		user.setPASSWORD((password));
@@ -67,17 +68,17 @@ public class UserController {
 		user.setPASSWORD((encoder.encode(password)));
 		System.out.println(user.getPASSWORD());
 		user.setUSER_NAME(user_name);
-		user.setEMAIL("creadoporapp");
+        user.setEMAIL(email);
 		user.setROL_NAME("Moderador");
 		Optional<UserModel> us=userService.getUser(user_name);
 		if(us.isPresent()){
 			return new ResponseEntity<>(
-			"your user name is alredy taken "+user.getUSER_NAME()+" role"+user.getROL_NAME(), 
+			"Este nombre ya esta en uso: "+user.getUSER_NAME()+" rol: "+user.getROL_NAME(),
 			HttpStatus.UNPROCESSABLE_ENTITY);
 		}else{
 			UserModel res=userService.saveUser(user);
 			return new ResponseEntity<>(
-				"your user register is succesfull "+user.getUSER_NAME()+" role"+user.getROL_NAME(), 
+				"Su registro es exitoso "+user.getUSER_NAME()+" rol: "+user.getROL_NAME(),
 				HttpStatus.OK);
 		}
 		
@@ -109,7 +110,7 @@ public class UserController {
 			}else{
 				UserModel res=userService.saveUser(user);
 				ConfirmationTokenModel confirmationToken = new ConfirmationTokenModel(user.getUSER_NAME());
-            	confirmationTokenRepository.save(confirmationToken);
+				confirmationTokenService.saveTK(confirmationToken);
 				SimpleMailMessage mailMessage = new SimpleMailMessage();
 				mailMessage.setTo(user.getEMAIL());
 				mailMessage.setSubject("Completar Registro!");
@@ -136,9 +137,12 @@ public class UserController {
     public ResponseEntity PasswordReset(@RequestParam("email")String email)
     {
         UserModel user=userService.getUserByEmail(email);
-		if(user!=null){
+		if(user!=null&&user.isENABLED()){
+            if(confirmationTokenService.getbyUser(user.getUSER_NAME())!=null){
+                confirmationTokenService.DeleteCTbyID(confirmationTokenService.getbyUser(user.getUSER_NAME()).getTOKEN_ID());
+            }
 			ConfirmationTokenModel confirmationToken = new ConfirmationTokenModel(user.getUSER_NAME());
-            confirmationTokenRepository.save(confirmationToken);
+            confirmationTokenService.saveTK(confirmationToken);
 			SimpleMailMessage mailMessage = new SimpleMailMessage();
 			mailMessage.setTo(user.getEMAIL());
 			mailMessage.setSubject("Reestablecer contraseña");
@@ -164,7 +168,7 @@ public class UserController {
         UserModel user=userService.getUserByEmail(email);
 		if(user!=null){
 			ConfirmationTokenModel confirmationToken = new ConfirmationTokenModel(user.getUSER_NAME());
-            confirmationTokenRepository.save(confirmationToken);
+            confirmationTokenService.saveTK(confirmationToken);
 			SimpleMailMessage mailMessage = new SimpleMailMessage();
 			mailMessage.setTo(user.getEMAIL());
 			mailMessage.setSubject("Cambio de contraseña");
@@ -187,7 +191,7 @@ public class UserController {
 	@RequestMapping(value="/confirm-password", method= {RequestMethod.POST})
     public ResponseEntity confirmPasswordChange(@RequestParam("token")String confirmationToken,@RequestParam("password")String password)
     {
-        ConfirmationTokenModel token = confirmationTokenRepository.findByConfirmationToken(confirmationToken);
+        ConfirmationTokenModel token = confirmationTokenService.getbyToken(confirmationToken);
 		Optional<UserModel> user=userService.getUser(token.getUSER_NAME());
 		encoder= new Encoder();
         if(token != null)
@@ -201,7 +205,7 @@ public class UserController {
 			}
 			System.out.println(token.getUSER_NAME());
             userService.updateUserPassword(token.getUSER_NAME(),encoder.encode(password));
-			confirmationTokenRepository.deleteById(token.getTOKEN_ID());
+            confirmationTokenService.DeleteCTbyID(token.getTOKEN_ID());
             return new ResponseEntity<>(
 					"your password recovery is succesfull "+token.getUSER_NAME(), 
 					HttpStatus.OK);
@@ -220,12 +224,12 @@ public class UserController {
 	@RequestMapping(value="/confirm-account", method= {RequestMethod.POST})
     public ResponseEntity confirmUserAccount(@RequestParam("token")String confirmationToken)
     {
-        ConfirmationTokenModel token = confirmationTokenRepository.findByConfirmationToken(confirmationToken);
+        ConfirmationTokenModel token = confirmationTokenService.getbyToken(confirmationToken);
         if(token != null)
         {
 			System.out.println(token.getUSER_NAME());
             userService.updateUserState(token.getUSER_NAME());
-			confirmationTokenRepository.deleteById(token.getTOKEN_ID());
+            confirmationTokenService.DeleteCTbyID(token.getTOKEN_ID());
             return new ResponseEntity<>(
 					"your user register is succesfull "+token.getUSER_NAME(), 
 					HttpStatus.OK);

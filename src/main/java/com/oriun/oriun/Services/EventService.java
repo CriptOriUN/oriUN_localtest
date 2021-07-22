@@ -47,10 +47,10 @@ public class EventService {
         return eventRepository.findWeekEvents(date,enddate);
     }
     public EventModel saveEvent(EventModel event){
-        Date sqlDate = new Date(event.getEVENT_INIT().getTime()+(86400000));//60000*60*24
+        /*Date sqlDate = new Date(event.getEVENT_INIT().getTime()+(86400000));//60000*60*24
         event.setEVENT_INIT(sqlDate);
         sqlDate = new Date(event.getEVENT_END().getTime()+(86400000));//60000*60*24
-        event.setEVENT_END(sqlDate);
+        event.setEVENT_END(sqlDate);*/
         if(event.getOTHER_SPORT()!=null){
             event.setOTHER_SPORT(FormatText(event.getOTHER_SPORT()));
         }
@@ -81,8 +81,8 @@ public class EventService {
                     }
                     else {*/
                         String des =newevent.getEVENT_DESCRIPTION();
-                        Date dei=new Date(newevent.getEVENT_INIT().getTime()+(86400000));//60000*60*24
-                        Date dee=new Date(newevent.getEVENT_END().getTime()+(86400000));//60000*60*24
+                        Date dei=new Date(newevent.getEVENT_INIT().getTime());//60000*60*24
+                        Date dee=new Date(newevent.getEVENT_END().getTime());//60000*60*24
                         double cap=newevent.getCAPACITY();
                         String os=newevent.getOTHER_SPORT();
                         Time tei=newevent.getEVENT_INIT_HOUR();
@@ -96,7 +96,7 @@ public class EventService {
                         notification.setEXPIRATION_TIME(tef);
                         notification.setNOTIFICATION_DESCRIPTION("A brand new event is coming : "+et);
                         notificationService.saveNotification(notification);*/
-                        notificationRepository.updateNotificationbyIdevent(Id_ne,ns,dei,tei,tef,"A brand new event is coming : "+et);
+                        notificationRepository.updateNotificationbyIdevent(Id_ne,ns,dei,tei,tef,"Un nuevo evento ha sido creado : "+et);
                         eventRepository.updatebyID(Id_ne,nl,ns,des,dei,dee,cap,os,tei,tef,et);//,nu
                         return new ResponseEntity<>("Actualizado",
                                 HttpStatus.OK);
