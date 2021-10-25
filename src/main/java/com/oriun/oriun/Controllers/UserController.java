@@ -73,12 +73,12 @@ public class UserController {
 		Optional<UserModel> us=userService.getUser(user_name);
 		if(us.isPresent()){
 			return new ResponseEntity<>(
-			"Este nombre ya esta en uso: "+user.getUSER_NAME()+" rol: "+user.getROL_NAME(),
+			"Este nombre ya esta en uso quick change: "+user.getUSER_NAME()+" rol: "+user.getROL_NAME(),
 			HttpStatus.UNPROCESSABLE_ENTITY);
 		}else{
 			UserModel res=userService.saveUser(user);
 			return new ResponseEntity<>(
-				"Su registro es exitoso "+user.getUSER_NAME()+" rol: "+user.getROL_NAME(),
+				"Su registro es exitoso quick change"+user.getUSER_NAME()+" rol: "+user.getROL_NAME(),
 				HttpStatus.OK);
 		}
 		
