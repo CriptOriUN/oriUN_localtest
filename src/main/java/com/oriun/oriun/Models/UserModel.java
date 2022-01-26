@@ -14,7 +14,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class UserModel {
 
     @Id
-    //@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(columnDefinition="text", unique = true, nullable = false)
     private String USER_NAME;
 

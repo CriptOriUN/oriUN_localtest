@@ -115,7 +115,7 @@ public class UserController {
 				mailMessage.setTo(user.getEMAIL());
 				mailMessage.setSubject("Completar Registro!");
 				mailMessage.setFrom("oriunmail@gmail.com");
-				String url="https://oriun.herokuapp.com/confirm-account?token="+confirmationToken.getCONFIRMATION_TOKEN();
+				String url="http://localhost:8080/confirm-account?token="+confirmationToken.getCONFIRMATION_TOKEN();
         		String content="< href='"+url+"'>"+url+"</a>";
 				String html= ("para comfirmar tu cuenta, ingresa al siguiente enlace : "
 				+url);

@@ -11,11 +11,11 @@ import java.util.List;
 
 @Repository
 public interface SolicitudRepository extends JpaRepository<SolicitudModel,Integer> {
-    @Query(value = "SELECT * FROM oriun_prueba.solicitud WHERE user_name=?1 LIMIT 1",
+    @Query(value = "SELECT * FROM oriun_db.solicitud WHERE user_name=?1 LIMIT 1",
             nativeQuery = true)
     List<SolicitudModel> findByReporter(String user);
     @Modifying
-    @Query(value = "DELETE FROM oriun_prueba.solicitud WHERE user_name=?1"
+    @Query(value = "DELETE FROM oriun_db.solicitud WHERE user_name=?1"
             , nativeQuery = true)
     void deletebyUser(String user);
 }
