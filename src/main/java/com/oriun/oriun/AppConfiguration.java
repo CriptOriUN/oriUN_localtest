@@ -8,7 +8,7 @@ import reactor.core.publisher.Sinks;
 
 @Configuration
 public class AppConfiguration {
-     private static final String NOTIFICATIONS_API_ENDPOINT = "localhost:8081/notifications";
+     private static final String NOTIFICATIONS_API_ENDPOINT = "localhost:8082/notifications";
 
     @Bean
     public WebClient webClient(){

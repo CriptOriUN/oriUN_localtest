@@ -27,7 +27,7 @@ public class OriunApplication {
         return new WebMvcConfigurerAdapter() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**").allowedOrigins("https://oriun.herokuapp.com").allowedMethods("*");
+                registry.addMapping("/**").allowedOrigins("http://localhost:8080").allowedMethods("*");
             }
         };
     }

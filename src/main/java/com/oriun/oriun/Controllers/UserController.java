@@ -24,7 +24,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.web.server.ResponseStatusException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.SignatureException;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 //OTH
@@ -259,7 +262,8 @@ public class UserController {
                             HttpStatus.NOT_ACCEPTABLE, "usuario baneado");
                 }
 			    else {
-                    String token = getJWTToken(user.get("user_name").toString());
+					String token = getJWTToken(user.get("user_name").toString(),us.get().getROL_NAME()); 
+					//System.out.println(token.split(" ")[1]);
                     if (us.get().getPASSWORD().equals(pass)) {
                         HashMap<String, Object> result = new HashMap();
                         result.put("TOKEN", token);
@@ -406,15 +410,31 @@ public class UserController {
 		
 	}*/
 
-	private String getJWTToken(String user_name) {
+	@GetMapping("/userinfo")
+	public ResponseEntity getuser(@RequestParam("token")String token){  
+		
+		String secretKey = "mySecretKey"; 
+		try{
+		Claims claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(token).getBody(); 
+		return new ResponseEntity<>(claims,
+					HttpStatus.OK );
+		}
+		catch(SignatureException e){ 
+			throw new ResponseStatusException(
+				HttpStatus.NOT_FOUND, "User Not Found");
+		}
+		
+	}
+	
+	private String getJWTToken(String user_name, String user_role) {
 		String secretKey = "mySecretKey";
 		List<GrantedAuthority> grantedAuthorities = AuthorityUtils
-				.commaSeparatedStringToAuthorityList("ROLE_USER");
+				.commaSeparatedStringToAuthorityList("ROLE_USER"); 
 		
 		String token = Jwts
 				.builder()
-				.setId("softtekJWT")
-				.setSubject(user_name)
+				.setId(user_name)
+				.setSubject(user_role) 
 				.claim("authorities",
 						grantedAuthorities.stream()
 								.map(GrantedAuthority::getAuthority)
