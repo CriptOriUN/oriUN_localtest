@@ -150,7 +150,7 @@ public class UserController {
 			mailMessage.setTo(user.getEMAIL());
 			mailMessage.setSubject("Reestablecer contraseña");
 			mailMessage.setFrom("oriunmail@gmail.com");
-			String url="https://oriun.herokuapp.com/password-reset?token="+confirmationToken.getCONFIRMATION_TOKEN();
+			String url="http://localhost:8080/password-reset?token="+confirmationToken.getCONFIRMATION_TOKEN();
         	String content="< href='"+url+"'>"+url+"</a>";
 			String html= ("Para cambiar su contraseña ingrese al siguiente enlace : "+url);
 			mailMessage.setText(html);
@@ -176,7 +176,7 @@ public class UserController {
 			mailMessage.setTo(user.getEMAIL());
 			mailMessage.setSubject("Cambio de contraseña");
 			mailMessage.setFrom("oriunmail@gmail.com");
-			String url="https://oriun.herokuapp.com/password-change?token="+confirmationToken.getCONFIRMATION_TOKEN();
+			String url="http://localhost:8080/password-change?token="+confirmationToken.getCONFIRMATION_TOKEN();
         	String content="< href='"+url+"'>"+url+"</a>";
 			String html= ("Para realizar el cambio de su contraseña ingrese al siguiente enlace : "+url);
 			mailMessage.setText(html);
